@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 class AdminService {
     static async createAdmin(adminData) {
 
-        console.log('Creating user with data: ', adminData);
+        console.log('Creating admin with data: ', adminData);
         try {
             //add new admin
             const newAdmin = await Admin.create(adminData);
@@ -57,6 +57,77 @@ class AdminService {
             return false;
         }
     }
+
+    static async getAllAdmin() {
+        console.log('>>>Calling all admin list')
+        try {
+            const Admins = await Admin.getAllAdmin();
+            return Admins;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async getAdminDetail(adminId) {
+        console.log('Find detail for admin Id: ', adminId);
+        const adminDetail = await Admin.findAdminById(adminId);
+        if (!adminDetail) throw new Error('User not found');
+        return adminDetail;
+    }
+
+    static async updateAdmin(adminId, updateData) {
+        console.log(">>> Update in admin id: ", adminId);
+        try {
+            const updateAdmin = await Admin.update(adminId, updateData);
+            if (!updateAdmin) throw new Error('Update failed');
+            return updateAdmin;
+        } catch (error) {
+            console.log("Error in Service: ", error)
+        }
+    }
+
+    static async deleteAdmin(adminId) {
+        console.log(">>>Deleting in service with id: ", adminId);
+        try {
+            const deleted = await Admin.delete(adminId);
+            if (!deleted) throw new Error('Delete failed');
+            return deleted;
+        } catch (error) {
+            console.log("Error in Service: ", error)
+        }
+    }
+
+    static async getAdminProfile(adminId) {
+        console.log('Find profile for admin ID:', adminId);
+        try {
+            const adminProfile = await Admin.findAdminById(adminId);
+            if (!adminProfile) throw new Error('Admin not found');
+            return adminProfile;
+        } catch (error) {
+            console.log("Error in Service: ", error)
+        }
+    }
+
+    static async searchAdminByUsername(partialUsername, page = 1, limit = 10) {
+        try {
+            const admins = await Admin.searchAdminByUsername(partialUsername, page, limit);
+            return admins;
+        } catch (error) {
+            console.error('Error finding admins by username:', error.message);
+            throw new Error('Error finding admins');
+        }
+    }
+
+    static async countAdminsByUsername(partialUsername) {
+        try {
+            const totalAdmins = await Admin.countAdminsByUsername(partialUsername);
+            return totalAdmins;
+        } catch (error) {
+            console.error('Error counting admins:', error.message);
+            throw new Error('Error counting admins');
+        }
+    }
+
 }
 
 module.exports = AdminService;
