@@ -1,5 +1,8 @@
 const Admin = require('../../models/Admin');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'your_jwt_secret_key';
+const { generateToken } = require('../../utils/tokenUtils');
 
 class AdminService {
     static async createAdmin(adminData) {
@@ -16,30 +19,26 @@ class AdminService {
     }
 
     static async loginAdmin(username, password) {
-        console.log('Login with input data to service: ', username, password);
+        console.log('Login with input data to service:', username, password);
         try {
-            //Find data input to db
             const admin = await Admin.findAdminByUsername(username);
-            console.log('User found: ', admin);
+            console.log('User found:', admin);
 
-            //if not found
             if (!admin) {
                 throw new Error('Invalid username or password');
             }
-
-            //Print Pass input
-            console.log('Password entered:', password);
-            //Print Pass in db
-            console.log('Stored hashed password:', admin.password);
 
             const isPasswordValid = await bcrypt.compare(password, admin.password);
             if (!isPasswordValid) {
                 throw new Error('Invalid username or password');
             }
 
-            return admin;
+            // Generate token
+            const token = generateToken(admin);
+            return { admin, token };
         } catch (error) {
-            console.log('Error: ', error);
+            console.log('Error:', error);
+            throw error;
         }
     }
 
@@ -127,6 +126,20 @@ class AdminService {
             throw new Error('Error counting admins');
         }
     }
+
+    static async resetPasswordAdmin(adminId) {
+        console.log('Resetting password for admin ID:', adminId);
+        try {
+            const reset = await Admin.resetPassword(adminId);
+            if (!reset) throw new Error('Password reset failed');
+            console.log('Password reset successful for admin ID:', adminId);
+            return { message: 'Password has been reset to default value.' };
+        } catch (error) {
+            console.log("Error in Service (resetPasswordAdmin):", error);
+            throw error;
+        }
+    }
+
 
 }
 

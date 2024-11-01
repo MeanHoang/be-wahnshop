@@ -1,21 +1,38 @@
 const jwt = require('jsonwebtoken');
 
-// Hàm tạo token
+const SECRET_KEY = process.env.JWT_SECRET || '1';
+
 const generateToken = (user) => {
-    return jwt.sign(
-        { id: user.id, username: user.username },   // Payload
-        process.env.JWT_SECRET,                     // Secret key
-        { expiresIn: '1h' }                         // Thời gian hết hạn
-    );
+    const payload = {
+        id: user.id,
+        username: user.username,
+    };
+
+    return jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
 };
 
-// Hàm xác thực token
 const verifyToken = (token) => {
     try {
-        return jwt.verify(token, process.env.JWT_SECRET);
+        return jwt.verify(token, SECRET_KEY);
     } catch (error) {
-        throw new Error('Invalid Token');
+        console.error('Invalid token:', error.message);
+        return null;
     }
 };
 
-module.exports = { generateToken, verifyToken };
+const refreshToken = (token) => {
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const newToken = generateToken({ id: decoded.id, username: decoded.username });
+        return newToken;
+    } catch (error) {
+        console.error('Invalid refresh token:', error.message);
+        return null;
+    }
+};
+
+module.exports = {
+    generateToken,
+    verifyToken,
+    refreshToken
+};

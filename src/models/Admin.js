@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 class Admin {
     //Create a acc admin
@@ -85,7 +86,7 @@ class Admin {
         try {
             const offset = (page - 1) * limit;
 
-            // Sửa lại cú pháp LIMIT và OFFSET
+            //LIMIT and OFFSET
             const [rows] = await db.promise().query(
                 'SELECT * FROM admin WHERE username LIKE ? LIMIT ? OFFSET ?',
                 [`%${partialUsername}%`, parseInt(limit), parseInt(offset)]
@@ -105,13 +106,32 @@ class Admin {
                 [`%${partialUsername}%`]
             );
 
-            return rows[0].total; // Trả về tổng số admin tìm được
+            return rows[0].total;
         } catch (error) {
             console.error('Error counting admins by partial username:', error.message);
             throw new Error('Error counting admins');
         }
     }
 
+    static async resetPassword(adminId) {
+        try {
+            const defaultPassword = process.env.DEFAUlL_PASS;
+
+            //Hash pass
+            const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+            const [result] = await db.promise().query('UPDATE admin SET password = ? WHERE id = ?', [hashedPassword, adminId]);
+
+            if (result.affectedRows === 0) {
+                throw new Error('Failed to reset password.');
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error resetting password:', error.message);
+            throw new Error('Error resetting password');
+        }
+    }
 }
 
 module.exports = Admin;

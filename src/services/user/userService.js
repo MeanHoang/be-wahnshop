@@ -44,5 +44,63 @@ class UserService {
             return false;
         }
     }
+
+    static async getAllUser() {
+        console.log('>>>Calling all admin list')
+        try {
+            const Users = await User.getAllUser();
+            return Users;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async updateUser(userId, updateData) {
+        console.log(">>> Update in user id: ", userId);
+        try {
+            const updateUser = await User.update(userId, updateData);
+            if (!updateUser) throw new Error('Update failed');
+            return updateUser;
+        } catch (error) {
+            console.log("Error in Service: ", error)
+        }
+    }
+
+    static async deleteUser(userId) {
+        console.log(">>>Deleting in service with id: ", userId)
+        try {
+            const deleted = await User.delete(userId);
+            if (!deleted) throw new Error('Delete failed');
+            return deleted;
+        } catch (error) {
+            console.log("Error in Service: ", error)
+        }
+    }
+
+    static async getUserProfile(userId) {
+        console.log('Find profile for user ID:', userId);
+        try {
+            const userProfile = await User.findUserById(userId);
+            if (!userProfile) throw new Error('Admin not found');
+            return userProfile;
+        } catch (error) {
+            console.log("Error in Service: ", error)
+        }
+    }
+
+    static async resetPassword(userId) {
+        console.log("Resetting password for user ID:", userId);
+        try {
+            const result = await User.resetPassword(userId);
+            if (!result) throw new Error('Password reset failed.');
+
+            console.log("Password reset successfully for user ID:", userId);
+            return result;
+        } catch (error) {
+            console.log("Error in Service:", error);
+            throw new Error('Error resetting password');
+        }
+    }
+
 }
 module.exports = UserService;

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 class User {
     //Create a acc user
@@ -11,7 +12,11 @@ class User {
                 email: userData.email,
                 phonenumber: userData.phonenumber,
                 password: hashedPassword,
-                fullname: userData.fullname
+                fullname: userData.fullname,
+                sex: userData.sex,
+                birthday: userData.birthday,
+                height: userData.height,
+                weight: userData.weight,
             };
 
             const [result] = await db.promise().query('INSERT INTO user SET ?', userToInsert);
@@ -53,11 +58,62 @@ class User {
     //get all user
     static async getAllUser() {
         try {
-            const [rows] = await db.promise().query("SELECT * FROM user DESC");
+            const [rows] = await db.promise().query("SELECT * FROM user ORDER BY id DESC;");
             console.log("Query get all user");
             return rows;
         } catch (error) {
             console.log('>>>Error get all in model: ', error);
+        }
+    }
+
+    //update user
+    static async update(userId, updateData) {
+        try {
+            if (updateData.password) {
+                updateData.password = await bcrypt.hash(updateData.password, 10);
+            }
+
+            const [result] = await db.promise().query('UPDATE user SET ? WHERE id = ?', [updateData, userId]);
+
+            if (result.affectedRows === 0) {
+                throw new Error('User update failed');
+            }
+
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error updating admin:', error.message);
+            throw new Error('Error updating admin profile');
+        }
+    }
+
+    //delete
+    static async delete(userId) {
+        const [result] = await db.promise().query('DELETE FROM user WHERE id = ?', [userId]);
+        return result.affectedRows > 0;
+    }
+
+    //Find one by ID
+    static async findUserById(userId) {
+        console.log("find one by id");
+        const [rows] = await db.promise().query('SELECT * FROM user WHERE id = ?', [userId]);
+        return rows[0];
+    }
+
+    static async resetPassword(userId) {
+        try {
+            const newPassword = process.env.DEFAUlL_PASS_USER;
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            const [result] = await db.promise().query('UPDATE user SET password = ? WHERE id = ?', [hashedPassword, userId]);
+
+            if (result.affectedRows === 0) {
+                throw new Error('Password reset failed. User may not exist.');
+            }
+
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error resetting password:', error.message);
+            throw new Error('Error resetting password');
         }
     }
 

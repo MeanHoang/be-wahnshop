@@ -1,16 +1,19 @@
-const { verifyToken } = require('../utils/tokenUtils');
+const { verifyToken } = require('../utils/tokenUtils'); // import hàm verifyToken từ file tokenUtils
 
 const authenticateToken = (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1]; // Lấy token từ header
-    if (!token) return res.status(401).json({ message: 'Access Denied. No Token Provided.' });
+    const token = req.headers['authorization']?.split(' ')[1]; // lấy token từ header
 
-    try {
-        const verified = verifyToken(token); // Xác thực token
-        req.user = verified; // Lưu thông tin người dùng vào request
-        next();
-    } catch (error) {
-        res.status(400).json({ message: 'Invalid Token' });
+    if (!token) {
+        return res.sendStatus(403); // Không có token
     }
+
+    const decoded = verifyToken(token);
+    if (!decoded) {
+        return res.sendStatus(403); // Token không hợp lệ
+    }
+
+    req.user = decoded; // lưu thông tin người dùng vào request
+    next(); // tiếp tục tới middleware hoặc route handler tiếp theo
 };
 
 module.exports = authenticateToken;
