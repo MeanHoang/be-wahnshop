@@ -6,6 +6,9 @@ const dotenv = require('dotenv');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const userShipment = require('./routes/userShipmentRouter');
+const categoryRoutes = require('./routes/categoryRoutes');
+const productRoutes = require('./routes/productRoutes');
+
 dotenv.config();
 
 const app = express();
@@ -17,5 +20,8 @@ app.use(cors);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user-shipment', userShipment);
+app.use('/api/category', categoryRoutes);
+app.use('/api/product', productRoutes);
+
 
 module.exports = app;
