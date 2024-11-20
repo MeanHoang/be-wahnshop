@@ -28,7 +28,7 @@ const getAllCategories = async (req, res) => {
 const updateCategory = async (req, res) => {
     console.log("Entering updateCategory with ID:", req.params.id, "and data:", req.body);
     try {
-        const categoryId = req.params.id;
+        const categoryId = req.body.id;
         const updateData = req.body;
         await CategoryService.updateCategory(categoryId, updateData);
         console.log("Category updated successfully for ID:", categoryId);
@@ -42,7 +42,7 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
     console.log("Entering deleteCategory with ID:", req.params.id);
     try {
-        const categoryId = req.params.id;
+        const categoryId = req.body.id;
         await CategoryService.deleteCategory(categoryId);
         console.log("Category deleted successfully for ID:", categoryId);
         res.status(200).json({ message: 'Category deleted successfully' });

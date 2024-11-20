@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const userShipment = require('./routes/userShipmentRouter');
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
+const imageProductRoutes = require('./routes/imageProductRoutes')
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/user-shipment', userShipment);
 app.use('/api/category', categoryRoutes);
 app.use('/api/product', productRoutes);
+app.use('/api/img-product', imageProductRoutes);
+
 
 
 module.exports = app;
