@@ -5,14 +5,20 @@ class Category {
         try {
             const dataToInsert = {
                 name: categoryData.name,
-                description: categoryData.description,
+                description: categoryData.description
             };
 
             const [result] = await db.promise().query(
-                'INSERT INTO category (name, description) VALUES (?, ?)',
-                [dataToInsert.name, dataToInsert.description]
+                'INSERT INTO category SET ?',
+                dataToInsert
             );
-            return result.insertId;
+
+            if (result.affectedRows === 0) {
+                throw new Error('Category creation failed!');
+            }
+            console.log(">> check result: ", result);
+
+            return { id: result.insertId, ...dataToInsert };
         } catch (error) {
             console.error("Error in create category:", error);
             throw error;
@@ -31,12 +37,11 @@ class Category {
 
     static async update(categoryId, updateData) {
         try {
-            const { name, description } = updateData;
-            await db.promise().query(
-                'UPDATE category SET name = ?, description = ? WHERE id = ?',
-                [name, description, categoryId]
+            const [result] = await db.promise().query(
+                'UPDATE category SET ? WHERE id = ?',
+                [updateData, categoryId]
             );
-            return true;
+            return result.affectedRows > 0;
         } catch (error) {
             console.error("Error in update category:", error);
             throw error;

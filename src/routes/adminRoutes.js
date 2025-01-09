@@ -5,11 +5,11 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 router.post('/register', adminController.registerAdmin);
 router.post('/login', adminController.loginAdmin);
-router.get('/', adminController.getAllAdmin);
-router.put('/profile', adminController.updateAdminProfile);
-router.delete('/profile', adminController.deleteAdminProfile);
-router.get('/profile', adminController.getAdminProfile);
+router.get('/', authenticateToken, adminController.getAllAdmin);
+router.put('/profile', authenticateToken, adminController.updateAdminProfile);
 router.get('/search', adminController.searchAdmin);
-router.put('/reset-password', adminController.resetPasswordAdmin);
+router.delete('/profile', authenticateToken, adminController.deleteAdminProfile);
+router.get('/profile', authenticateToken, adminController.getAdminProfile);
+router.put('/reset-password', authenticateToken, adminController.resetPasswordAdmin);
 
 module.exports = router;

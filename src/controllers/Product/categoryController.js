@@ -14,11 +14,27 @@ const createCategory = async (req, res) => {
 };
 
 const getAllCategories = async (req, res) => {
-    console.log("Entering getAllCategories");
+    console.log('Get All Category Request:', req.query);
+    const { page = 1, limit = 7, searchTerm = '' } = req.query;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
     try {
-        const categories = await CategoryService.getAllCategories();
-        console.log("Categories retrieved:", categories);
-        res.status(200).json(categories);
+        const allCategories = await CategoryService.getAllCategories();
+
+        const filteredCategories = allCategories.filter((category) =>
+            category.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        // Divide page
+        const categories = filteredCategories.slice(startIndex, endIndex);
+        console.log('Filtered Categories:', filteredCategories.length, 'Page:',
+            page, 'Categories on Page:', categories.length);
+        res.json({
+            total: filteredCategories.length,
+            page,
+            categories,
+        });
     } catch (error) {
         console.error("Error in getAllCategories:", error);
         res.status(500).json({ message: 'Failed to retrieve categories' });

@@ -36,14 +36,36 @@ const deleteProduct = async (req, res) => {
 };
 
 const getAllProduct = async (req, res) => {
+    console.log('Get All Product Request:', req.query);
+
+    const { page = 1, limit = 8, searchTerm = '' } = req.query;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
     try {
-        const products = await ProductService.getAllProduct();
-        res.status(200).json(products);
+        const allProducts = await ProductService.getAllProduct();
+
+        console.log('All Products:', allProducts);
+
+        const filteredProducts = allProducts.filter((product) =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        const products = filteredProducts.slice(startIndex, endIndex);
+        console.log('Filtered Products:', filteredProducts.length, 'Page:', page, 'Products on Page:', products.length);
+
+        res.json({
+            total: filteredProducts.length,
+            page,
+            products,
+        });
     } catch (error) {
-        console.error("Error in getAllProduct:", error);
-        res.status(500).json({ message: 'Failed to retrieve products', error: error.message });
+        console.error('Error in getAllProduct:', error.message);
+        res.status(500).json({ error: error.message });
     }
 };
+
+
 
 const getProductById = async (req, res) => {
     try {

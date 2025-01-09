@@ -78,22 +78,27 @@ const deleteUserProfile = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
     try {
-        console.log(">>>check req.body: ", req.body);
         const userId = req.body.id;
         const userProfile = await UserService.getUserProfile(userId);
-        res.status(200).json(userProfile);
+
+        if (userProfile) {
+            return res.status(200).json(userProfile);
+        } else {
+            return res.status(400).json({ message: 'Not found user' });
+        }
     } catch (error) {
         console.error('Error find user profile:', error.message);
         res.status(404).json({ error: error.message });
     }
 };
 
+
 const resetUserPassword = async (req, res) => {
     try {
         console.log(">>> Check req.body: ", req.body);
         const userId = req.body.id;
         await UserService.resetPassword(userId);
-        res.status(200).json({ message: 'Password has been reset successfully to 123456.' });
+        res.status(200).json({ message: 'Password has been reset successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

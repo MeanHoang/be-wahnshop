@@ -1,4 +1,6 @@
 const db = require('../config/db');
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 class Product {
 
@@ -9,7 +11,7 @@ class Product {
                 INSERT INTO product (category_id, name, description, price) 
                 VALUES (?, ?, ?, ?)
             `;
-            const [result] = await db.execute(query, [category_id, name, description, price]);
+            const [result] = await db.promise().execute(query, [category_id, name, description, price]);
             return result.insertId;
         } catch (error) {
             console.error("Error creating product:", error);
@@ -51,13 +53,15 @@ class Product {
                 FROM product p 
                 LEFT JOIN image_product ip ON p.id = ip.product_id AND ip.is_default = true
             `;
-            const [rows] = await db.execute(query);
+            const [rows] = await db.promise().execute(query);
+            console.log("Retrieved all products:", rows);
             return rows;
         } catch (error) {
             console.error("Error retrieving all products:", error);
             throw error;
         }
     }
+
 
     static async getProductById(productId) {
         try {
@@ -67,8 +71,8 @@ class Product {
                 LEFT JOIN image_product ip ON p.id = ip.product_id AND ip.is_default = true 
                 WHERE p.id = ?
             `;
-            const [rows] = await db.execute(query, [productId]);
-            return rows[0] || null; // Trả về null nếu không tìm thấy sản phẩm
+            const [rows] = await db.promise().execute(query, [productId]);
+            return rows[0] || null;
         } catch (error) {
             console.error(`Error retrieving product with ID ${productId}:`, error);
             throw error;
@@ -83,7 +87,7 @@ class Product {
                 LEFT JOIN image_product ip ON p.id = ip.product_id AND ip.is_default = true 
                 WHERE p.category_id = ?
             `;
-            const [rows] = await db.execute(query, [categoryId]);
+            const [rows] = await db.promise().execute(query, [categoryId]);
             return rows;
         } catch (error) {
             console.error(`Error retrieving products for category ID ${categoryId}:`, error);

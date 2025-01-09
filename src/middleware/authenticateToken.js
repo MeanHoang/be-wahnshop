@@ -1,19 +1,20 @@
-const { verifyToken } = require('../utils/tokenUtils'); // import hàm verifyToken từ file tokenUtils
+const { verifyToken } = require('../utils/tokenUtils'); // Import verifyToken từ tokenUtils
 
 const authenticateToken = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1]; // lấy token từ header
+    const token = req.headers['authorization']?.split(' ')[1]; // Lấy token từ header
 
     if (!token) {
-        return res.sendStatus(403); // Không có token
+        return res.status(403).json({ message: 'Login falied' }); // Không có token
     }
 
-    const decoded = verifyToken(token);
+    const decoded = verifyToken(token); // Sử dụng verifyToken
+
     if (!decoded) {
-        return res.sendStatus(403); // Token không hợp lệ
+        return res.status(403).json({ message: 'Token invaid' }); // Token không hợp lệ
     }
 
-    req.user = decoded; // lưu thông tin người dùng vào request
-    next(); // tiếp tục tới middleware hoặc route handler tiếp theo
+    req.user = decoded; // Lưu thông tin người dùng vào request
+    next(); // Tiếp tục tới middleware hoặc route handler tiếp theo
 };
 
 module.exports = authenticateToken;

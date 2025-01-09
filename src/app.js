@@ -25,6 +25,4 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/product', productRoutes);
 app.use('/api/img-product', imageProductRoutes);
 
-
-
 module.exports = app;

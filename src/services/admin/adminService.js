@@ -57,6 +57,15 @@ class AdminService {
         }
     }
 
+    static async countUsername(username) {
+        console.log('Check username is: ', username);
+
+        //Check username is used
+        const countAdmin = await Admin.countAdminByUsername(username);
+
+        return countAdmin;
+    }
+
     static async getAllAdmin() {
         console.log('>>>Calling all admin list')
         try {

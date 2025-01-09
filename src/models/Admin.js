@@ -41,6 +41,12 @@ class Admin {
         return rows.length > 0 ? rows[0] : null;
     }
 
+    static async countAdminByUsername(username) {
+        const [rows] = await db.promise().query('SELECT * FROM admin WHERE username =? AND is_active=1', [username]);
+        console.log('Count result:', rows.length);
+        return rows.length;
+    }
+
     //get all acc admins
     static async getAllAdmin() {
         console.log("get all acc admins");
@@ -59,6 +65,7 @@ class Admin {
     static async update(adminId, updateData) {
         try {
             if (updateData.password) {
+                console.log("check pass: ", updateData.password)
                 updateData.password = await bcrypt.hash(updateData.password, 10);
             }
 

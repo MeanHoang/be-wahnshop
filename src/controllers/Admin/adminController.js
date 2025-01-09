@@ -47,7 +47,7 @@ const getAllAdmin = async (req, res) => {
 
     try {
         const allAdmins = await AdminService.getAllAdmin(); // Get all admins from your DB
-        console.log('All Admins:', allAdmins);
+        //console.log('All Admins:', allAdmins);
 
         // Filter admin by username
         const filteredAdmins = allAdmins.filter((admin) =>
@@ -56,7 +56,8 @@ const getAllAdmin = async (req, res) => {
 
         // Divide page
         const admins = filteredAdmins.slice(startIndex, endIndex);
-        console.log('Filtered Admins:', filteredAdmins.length, 'Page:', page, 'Admins on Page:', admins.length);
+        console.log('Filtered Admins:', filteredAdmins.length, 'Page:',
+            page, 'Admins on Page:', admins.length);
 
         res.json({
             total: filteredAdmins.length,
@@ -73,9 +74,17 @@ const updateAdminProfile = async (req, res) => {
     console.log('Update Admin Profile Request:', req.body);
     try {
         const adminId = req.body.id;
-        const updateAdmin = await AdminService.updateAdmin(adminId, req.body); // Implement this method in your service
-        console.log('Admin Profile Updated:', updateAdmin);
-        res.status(200).json({ message: 'Admin profile updated successfully', Admin: updateAdmin });
+        const count = await AdminService.countAdminsByUsername(req.body.username);
+        console.log("check count: ", count);
+        console.log("check req.body: ", req.body);
+        if (count <= 1) {
+            const updateAdmin = await AdminService.updateAdmin(adminId, req.body);
+            console.log('Admin Profile Updated:', updateAdmin);
+            res.status(201).json({ message: 'Admin profile updated successfully', Admin: updateAdmin });
+        } else {
+            console.log("Username is used!")
+            return res.status(202).json({ message: 'Username is used' });
+        }
     } catch (error) {
         console.error('Error in updateAdminProfile:', error.message);
         res.status(400).json({ error: error.message });
@@ -86,7 +95,7 @@ const deleteAdminProfile = async (req, res) => {
     console.log('Delete Admin Profile Request:', req.body);
     try {
         const adminId = req.body.id;
-        await AdminService.deleteAdmin(adminId); // Implement this method in your service
+        await AdminService.deleteAdmin(adminId);
         console.log('Admin Deleted:', adminId);
         res.status(200).json({ message: 'Admin deleted successfully' });
     } catch (error) {
@@ -99,7 +108,7 @@ const getAdminProfile = async (req, res) => {
     console.log('Get Admin Profile Request:', req.body);
     try {
         const adminId = req.body.id;
-        const adminProfile = await AdminService.getAdminProfile(adminId); // Implement this method in your service
+        const adminProfile = await AdminService.getAdminProfile(adminId);
         console.log('Admin Profile:', adminProfile);
         res.status(200).json(adminProfile);
     } catch (error) {
