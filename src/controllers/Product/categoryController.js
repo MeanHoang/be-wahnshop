@@ -1,4 +1,4 @@
-const CategoryService = require('../../services/product/categoryServer');
+const CategoryService = require('../../services/product/categoryService');
 
 const createCategory = async (req, res) => {
     console.log("Entering createCategory with data:", req.body);

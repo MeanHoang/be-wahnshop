@@ -4,33 +4,35 @@ require('dotenv').config();
 
 class Product {
 
-    static async create(productData) {
+    static async create(data) {
         try {
-            const { category_id, name, description, price } = productData;
-            const query = `
-                INSERT INTO product (category_id, name, description, price) 
-                VALUES (?, ?, ?, ?)
-            `;
-            const [result] = await db.promise().execute(query, [category_id, name, description, price]);
-            return result.insertId;
+            const [result] = await db.promise().query(
+                'INSERT INTO product SET ?',
+                data
+            );
+
+            if (result.affectedRows === 0) {
+                throw new Error('Create failed!');
+            }
+
+            console.log("check result: ", result);
+
+            return { id: result.insertId, ...data };
         } catch (error) {
-            console.error("Error creating product:", error);
+            console.error("Error in model:", error);
             throw error;
         }
     }
 
     static async update(productId, updateData) {
         try {
-            const { name, description, price } = updateData;
-            const query = `
-                UPDATE product 
-                SET name = ?, description = ?, price = ? 
-                WHERE id = ?
-            `;
-            await db.execute(query, [name, description, price, productId]);
-            return true;
+            const [result] = await db.promise().query(
+                'UPDATE product SET ? WHERE id = ?',
+                [updateData, productId]
+            );
+            return result.affectedRows > 0;
         } catch (error) {
-            console.error(`Error updating product with ID ${productId}:`, error);
+            console.error("Error in update model:", error);
             throw error;
         }
     }
@@ -46,18 +48,16 @@ class Product {
         }
     }
 
+    //get all
     static async getAllProduct() {
         try {
-            const query = `
-                SELECT p.*, ip.image_url 
-                FROM product p 
-                LEFT JOIN image_product ip ON p.id = ip.product_id AND ip.is_default = true
-            `;
-            const [rows] = await db.promise().execute(query);
-            console.log("Retrieved all products:", rows);
+            const [rows] = await db.promise().query(
+                'SELECT * FROM product'
+            );
+
             return rows;
         } catch (error) {
-            console.error("Error retrieving all products:", error);
+            console.error("Error in model:", error);
             throw error;
         }
     }
@@ -65,32 +65,22 @@ class Product {
 
     static async getProductById(productId) {
         try {
-            const query = `
-                SELECT p.*, ip.image_url 
-                FROM product p 
-                LEFT JOIN image_product ip ON p.id = ip.product_id AND ip.is_default = true 
-                WHERE p.id = ?
-            `;
-            const [rows] = await db.promise().execute(query, [productId]);
+            const [rows] = await db.promise().query(
+                'SELECT * FROM product WHERE id = ?', [productId]);
             return rows[0] || null;
         } catch (error) {
-            console.error(`Error retrieving product with ID ${productId}:`, error);
+            console.error("Error in model:", error);
             throw error;
         }
     }
 
     static async getProductByCategory(categoryId) {
         try {
-            const query = `
-                SELECT p.*, ip.image_url 
-                FROM product p 
-                LEFT JOIN image_product ip ON p.id = ip.product_id AND ip.is_default = true 
-                WHERE p.category_id = ?
-            `;
-            const [rows] = await db.promise().execute(query, [categoryId]);
-            return rows;
+            const [rows] = await db.promise().query(
+                'SELECT * FROM product WHERE category_id = ?', [categoryId]);
+            return rows[0] || null;
         } catch (error) {
-            console.error(`Error retrieving products for category ID ${categoryId}:`, error);
+            console.error("Error in model:", error);
             throw error;
         }
     }

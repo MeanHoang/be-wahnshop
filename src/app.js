@@ -9,6 +9,9 @@ const userShipment = require('./routes/userShipmentRouter');
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
 const imageProductRoutes = require('./routes/imageProductRoutes')
+const attributeRoutes = require('./routes/attributeRoutes');
+const attributeOptionRoutes = require('./routes/attributeOptionRoutes');
+
 
 dotenv.config();
 
@@ -21,8 +24,10 @@ app.use(cors);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user-shipment', userShipment);
+app.use('/api/attribute', attributeRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/product', productRoutes);
 app.use('/api/img-product', imageProductRoutes);
+app.use('/api/attribute-option', attributeOptionRoutes);
 
 module.exports = app;

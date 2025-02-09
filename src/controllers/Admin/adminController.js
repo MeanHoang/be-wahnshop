@@ -1,3 +1,4 @@
+const Admin = require('../../models/Admin');
 const AdminService = require('../../services/admin/adminService');
 const { generateToken } = require('../../utils/tokenUtils');
 
@@ -77,14 +78,24 @@ const updateAdminProfile = async (req, res) => {
         const count = await AdminService.countAdminsByUsername(req.body.username);
         console.log("check count: ", count);
         console.log("check req.body: ", req.body);
-        if (count <= 1) {
-            const updateAdmin = await AdminService.updateAdmin(adminId, req.body);
-            console.log('Admin Profile Updated:', updateAdmin);
-            res.status(201).json({ message: 'Admin profile updated successfully', Admin: updateAdmin });
-        } else {
-            console.log("Username is used!")
-            return res.status(202).json({ message: 'Username is used' });
+
+        const currentAdmin = await AdminService.getAdminDetail(adminId);
+
+        console.log("check current admin: ", currentAdmin);
+
+        if (req.body.username && req.body.username !== currentAdmin.username) {
+            const count = await AdminService.countAdminsByUsername(req.body.username);
+            console.log("check count: ", count);
+            if (count > 0) {
+                console.log("Tên đăng nhập đã được sử dụng");
+                return res.status(400).json({ message: 'Tên đăng nhập đã được sử dụng' });
+            }
         }
+
+        // Tiến hành cập nhật
+        const updateAdmin = await AdminService.updateAdmin(adminId, req.body);
+        console.log('Admin Profile Updated:', updateAdmin);
+        res.status(200).json({ message: 'Cập nhập thành công', Admin: updateAdmin });
     } catch (error) {
         console.error('Error in updateAdminProfile:', error.message);
         res.status(400).json({ error: error.message });

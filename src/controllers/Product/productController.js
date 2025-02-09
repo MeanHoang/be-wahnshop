@@ -1,16 +1,38 @@
 const ProductService = require('../../services/product/productService');
-const { generateToken } = require('../../utils/tokenUtils');
+const cloudinary = require('../../config/cloudinary');
 
 const createProduct = async (req, res) => {
     try {
-        const productData = req.body;
-        const productId = await ProductService.createProduct(productData);
-        res.status(201).json({ message: 'Product created successfully', productId });
+        console.log("Request body:", req.body);
+        console.log("File uploaded:", req.file);
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded!' });
+        }
+
+        // Lấy URL của ảnh từ Cloudinary
+        const imageUrl = req.file.path;
+
+        // Dữ liệu sản phẩm từ body request
+        const data = { ...req.body, image_url_default: imageUrl };
+
+        // Gọi method tạo sản phẩm từ Model
+        const product = await ProductService.createProduct(data);
+
+        res.status(201).json({
+            message: 'Tạo sản phẩm thành công!',
+            product,
+        });
     } catch (error) {
-        console.error("Error in createProduct:", error);
-        res.status(500).json({ message: 'Failed to create product', error: error.message });
+        console.error('Lỗi khi tạo sản phẩm:', error.message);
+        // Nếu có ảnh nhưng sản phẩm tạo thất bại => Xóa ảnh khỏi Cloudinary
+        if (req.file) {
+            await cloudinary.uploader.destroy(req.file.filename);
+        }
+        res.status(500).json({ message: 'Lỗi Server', error: error.message });
     }
 };
+
 
 const updateProduct = async (req, res) => {
     try {

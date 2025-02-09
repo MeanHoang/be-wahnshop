@@ -6,6 +6,7 @@ class ProductService {
     static async createProduct(productData) {
         try {
             const productId = await Product.create(productData);
+            
             console.log("Product created with ID:", productId);
             return productId;
         } catch (error) {
