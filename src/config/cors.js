@@ -1,9 +1,10 @@
 const cors = require('cors');
 
 const corsOptions = {
-    origin: 'http://localhost:3000', // Enable frontend url
+    // origin: ['http://localhost:3000', 'https://meanhoang-fe-admin.vercel.app/'], // Cho phép nhiều domain
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true // Allow cookies
+    credentials: true
 };
 
 module.exports = cors(corsOptions);
