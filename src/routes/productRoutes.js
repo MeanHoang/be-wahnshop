@@ -8,7 +8,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 router.post('/create', upload.single('image'), authenticateToken, productController.createProduct);
 
 // Cập nhật sản phẩm
-router.put('/detail', authenticateToken, productController.updateProduct);
+router.put('/detail', upload.single('image'), authenticateToken, productController.updateProduct);
 
 // Xóa sản phẩm
 router.delete('/detail', authenticateToken, productController.deleteProduct);

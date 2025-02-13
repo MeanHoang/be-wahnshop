@@ -25,7 +25,6 @@ const createProduct = async (req, res) => {
         });
     } catch (error) {
         console.error('Lỗi khi tạo sản phẩm:', error.message);
-        // Nếu có ảnh nhưng sản phẩm tạo thất bại => Xóa ảnh khỏi Cloudinary
         if (req.file) {
             await cloudinary.uploader.destroy(req.file.filename);
         }
@@ -37,24 +36,64 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         const productId = req.body.id;
-        const updateData = req.body;
+
+        console.log("Request body:", req.body);
+        console.log("File uploaded:", req.file);
+
+        let updateData = req.body;
+
+        // Kiểm tra xem có ảnh mới được tải lên không
+        if (req.file) {
+            const imageUrl = req.file.path;
+            updateData = { ...req.body, image_url_default: imageUrl };
+        }
+
         await ProductService.updateProduct(productId, updateData);
-        res.status(200).json({ message: 'Product updated successfully' });
+        res.status(200).json({ message: 'Cập nhật sản phẩm thành công' });
+
     } catch (error) {
-        console.error("Error in updateProduct:", error);
-        res.status(500).json({ message: 'Failed to update product', error: error.message });
+        console.error("Lỗi khi cập nhật sản phẩm:", error);
+        res.status(500).json({ message: 'Lỗi Server', error: error.message });
     }
 };
+
 
 const deleteProduct = async (req, res) => {
     try {
         const productId = req.body.id;
+
+        const product = await ProductService.getProductById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        console.log("Check image_url_default:", product.image_url_default);
+
+        if (product.image_url_default) {
+            const publicId = extractPublicId(product.image_url_default);
+            console.log("Extracted public_id:", publicId);
+
+            if (publicId) {
+                const result = await cloudinary.uploader.destroy(publicId, { invalidate: true, resource_type: "image" });
+                console.log("Cloudinary delete response:", result);
+            }
+        } else {
+            console.warn("Product does not have an image.");
+        }
+
         await ProductService.deleteProduct(productId);
-        res.status(200).json({ message: 'Product deleted successfully' });
+        console.log(`Product ${productId} deleted from DB`);
+
+        res.status(200).json({ message: "Xóa thành công" });
     } catch (error) {
         console.error("Error in deleteProduct:", error);
-        res.status(500).json({ message: 'Failed to delete product', error: error.message });
+        res.status(500).json({ message: "Failed to delete product", error: error.message });
     }
+};
+
+const extractPublicId = (imageUrl) => {
+    const matches = imageUrl.match(/\/upload\/(?:v\d+\/)?([^/.]+)\./);
+    return matches ? matches[1] : null;
 };
 
 const getAllProduct = async (req, res) => {
@@ -67,7 +106,7 @@ const getAllProduct = async (req, res) => {
     try {
         const allProducts = await ProductService.getAllProduct();
 
-        console.log('All Products:', allProducts);
+        // console.log('All Products:', allProducts);
 
         const filteredProducts = allProducts.filter((product) =>
             product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -91,8 +130,9 @@ const getAllProduct = async (req, res) => {
 
 const getProductById = async (req, res) => {
     try {
-        const productId = req.body.id;
-        const product = await ProductService.getProductById(productId);
+        const { product_id } = req.query;
+        console.log("check res.query:", req.query);
+        const product = await ProductService.getProductById(product_id);
         if (product) {
             res.status(200).json(product);
         } else {
