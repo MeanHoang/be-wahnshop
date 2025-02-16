@@ -84,8 +84,8 @@ class AttributeOptionController {
 
     // Tìm tùy chọn theo ID
     static async findAttributeOptionById(req, res) {
-        const { id } = req.body;
-        console.log("check req.body: ", req.body);
+        const { id } = req.query;
+        console.log("check req.query findAttributeOptionById: ", req.query);
         try {
             const attributeOption = await AtributeOptionService.findAttributeOptionById(id);
             if (!attributeOption) {

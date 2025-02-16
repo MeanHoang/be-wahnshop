@@ -1,5 +1,4 @@
 const AttributeOption = require('../../models/AtributeOption');
-const { deleteAttribute } = require('./attributeService');
 
 class AtributeOptionService {
 

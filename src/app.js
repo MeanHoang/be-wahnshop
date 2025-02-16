@@ -11,6 +11,8 @@ const productRoutes = require('./routes/productRoutes');
 const imageProductRoutes = require('./routes/imageProductRoutes')
 const attributeRoutes = require('./routes/attributeRoutes');
 const attributeOptionRoutes = require('./routes/attributeOptionRoutes');
+const skuRoutes = require('./routes/skuRoutes');
+const attributeOptionSkuRoutes = require('./routes/attributeOptionSkuRoutes');
 
 
 dotenv.config();
@@ -29,5 +31,7 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/product', productRoutes);
 app.use('/api/img-product', imageProductRoutes);
 app.use('/api/attribute-option', attributeOptionRoutes);
+app.use('/api/sku', skuRoutes);
+app.use('/api/attribute-option-sku', attributeOptionSkuRoutes);
 
 module.exports = app;

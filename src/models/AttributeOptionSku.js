@@ -1,11 +1,11 @@
 const db = require('../config/db');
 
-class Sku {
+class AttributeOptionSku {
 
     static async create(data) {
         try {
             const [result] = await db.promise().query(
-                'INSERT INTO sku SET ?',
+                'INSERT INTO attribute_option_sku  SET ?',
                 data
             );
 
@@ -23,34 +23,26 @@ class Sku {
     }
 
     static async update(skuId, updateData) {
-        try {
-            const [result] = await db.promise().query(
-                'UPDATE sku SET ? WHERE id = ?',
-                [updateData, skuId]
-            );
-            return result.affectedRows > 0;
-        } catch (error) {
-            console.error("Error in update model:", error);
-            throw error;
-        }
     }
 
-    static async delete(skuId) {
+    static async delete(sku_id, attribute_option_id) {
         try {
-            const query = `DELETE FROM sku WHERE id = ?`;
-            await db.execute(query, [skuId]);
+            const query = `DELETE FROM attribute_option_sku 
+                           WHERE sku_id = ? AND attribute_option_id = ?`;
+            await db.execute(query, [sku_id, attribute_option_id]);
             return true;
         } catch (error) {
-            console.error(`Error deleting sku with ID ${skuId}:`, error);
+            console.error(`Error deleting record with sku_id ${sku_id} and attribute_option_id ${attribute_option_id}:`, error);
             throw error;
         }
     }
 
+
     //get all
-    static async getAllSku() {
+    static async getAllAttributeOptionSku() {
         try {
             const [rows] = await db.promise().query(
-                'SELECT * FROM sku'
+                'SELECT * FROM attribute_option_sku'
             );
 
             return rows;
@@ -61,22 +53,10 @@ class Sku {
     }
 
 
-    static async getSkuById(skuId) {
+    static async getAttributeOptionSkuById(skuId) {
         try {
             const [rows] = await db.promise().query(
-                'SELECT * FROM sku WHERE id = ?', [skuId]);
-            return rows[0] || null;
-        } catch (error) {
-            console.error("Error in model:", error);
-            throw error;
-        }
-    }
-
-
-    static async getSkyByProduct(productId) {
-        try {
-            const [rows] = await db.promise().query(
-                'SELECT * FROM sku WHERE product_id = ?', [productId]);
+                'SELECT * FROM attribute_option_sku WHERE sku_id = ?', [skuId]);
             return rows;
         } catch (error) {
             console.error("Error in model:", error);
@@ -86,4 +66,4 @@ class Sku {
 
 }
 
-module.exports = Sku;
+module.exports = AttributeOptionSku;
