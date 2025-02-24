@@ -9,5 +9,6 @@ router.get('/', categoryController.getAllCategories);
 router.get('/detail', categoryController.getCategoryById);
 router.put('/detail', authenticateToken, categoryController.updateCategory);
 router.delete('/detail', authenticateToken, categoryController.deleteCategory);
+router.get('/is-active', categoryController.getAllCategoryActive);
 
 module.exports = router;

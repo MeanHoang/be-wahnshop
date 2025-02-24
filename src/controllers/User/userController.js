@@ -28,6 +28,19 @@ const registerUser = async (req, res) => {
 
 }
 
+const signIn = async (req, res) => {
+    console.log('Login user:', req.body);
+    try {
+        const { email, password } = req.body;
+        const user = await UserService.signIn(email, password);
+
+        return res.status(200).json({ message: 'Login successful', user });
+    } catch (error) {
+        console.error('Error in login:', error.message);
+        return res.status(401).json({ error: error.message });
+    }
+}
+
 const getAllUser = async (req, res) => {
     const { page = 1, limit = 7, searchTerm = '' } = req.query;
     const startIndex = (page - 1) * limit;
@@ -110,5 +123,6 @@ module.exports = {
     updateUserProfile,
     deleteUserProfile,
     getUserProfile,
-    resetUserPassword
+    resetUserPassword,
+    signIn
 }

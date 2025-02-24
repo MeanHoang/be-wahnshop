@@ -3,20 +3,18 @@ const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 class User {
-    //Create a acc user
+    // Create a user (bao gồm cả Google User)
     static async create(userData) {
         try {
-            // hash password
-            const hashedPassword = await bcrypt.hash(userData.password, 10);
-            const userToInsert = {
+            let userToInsert = {
                 email: userData.email,
-                phonenumber: userData.phonenumber,
-                password: hashedPassword,
+                phonenumber: userData.phonenumber || null,
+                password: userData.password ? await bcrypt.hash(userData.password, 10) : null,
                 fullname: userData.fullname,
-                sex: userData.sex,
-                birthday: userData.birthday,
-                height: userData.height,
-                weight: userData.weight,
+                sex: userData.sex || null,
+                birthday: userData.birthday || null,
+                height: userData.height || null,
+                weight: userData.weight || null,
             };
 
             const [result] = await db.promise().query('INSERT INTO user SET ?', userToInsert);
@@ -28,45 +26,100 @@ class User {
             console.log(">> check result: ", result);
             return { id: result.insertId, ...userToInsert };
         } catch (error) {
-            console.error('Error creating user acc:', error.message);
-            throw new Error('Error creating user acc'); // Ném lại lỗi cho controller xử lý
+            console.error('Error creating user:', error.message);
+            throw new Error('Error creating user');
         }
     }
 
-    //Find user by email 
+    // Login (Hỗ trợ cả Google Login)
+    static async signIn(email, password, googleId = null) {
+        try {
+            let query, params;
+
+            if (googleId) {
+                query = 'SELECT * FROM user WHERE email = ? AND googleId = ? AND is_active = 1';
+                params = [email, googleId];
+            } else {
+                query = 'SELECT * FROM user WHERE email = ? AND is_active = 1';
+                params = [email];
+            }
+
+            const [rows] = await db.promise().query(query, params);
+
+            if (!rows.length) return null;
+
+            const user = rows[0];
+
+            if (!googleId && password) {
+                const isMatch = await bcrypt.compare(password, user.password);
+                if (!isMatch) return null;
+            }
+
+            return user;
+        } catch (error) {
+            console.error('Error in signIn:', error.message);
+            throw new Error('Error in signIn');
+        }
+    }
+
+    // Find or create Google User
+    static async findOrCreateGoogleUser(email, fullname, googleId, avatar) {
+        try {
+            const [user] = await db.promise().query("SELECT * FROM user WHERE email=?", [email]);
+
+            if (user.length > 0) {
+                return user[0]; // Nếu user đã tồn tại, trả về user
+            }
+
+            // Nếu user chưa tồn tại, tạo mới
+            const newUser = await User.create({
+                email,
+                fullname,
+                googleId,
+                avatar,
+            });
+
+            return newUser;
+        } catch (error) {
+            console.error('Error in findOrCreateGoogleUser:', error.message);
+            throw new Error('Error in findOrCreateGoogleUser');
+        }
+    }
+
+    // Tìm người dùng bằng email
     static async findUserByEmail(email) {
         try {
-            const [user] = await db.promise().query("SELECT * FROM user WHERE email=?", [email])
-            console.log('Query result: ', user);
+            const [user] = await db.promise().query("SELECT * FROM user WHERE email=?", [email]);
             return user.length > 0 ? user[0] : null;
         } catch (error) {
-            console.log('>>>Error findbyEmail in model: ', error);
+            console.error('Error in findUserByEmail:', error.message);
+            throw new Error('Error in findUserByEmail');
         }
     }
 
-    //Find user by phonenumber
+    // Tìm người dùng bằng số điện thoại
     static async findUserByPhone(phonenumber) {
         try {
-            const [user] = await db.promise().query("SELECT * FROM user WHERE phonenumber=?", [phonenumber])
-            console.log('Query result: ', user);
+            const [user] = await db.promise().query("SELECT * FROM user WHERE phonenumber=?", [phonenumber]);
             return user.length > 0 ? user[0] : null;
         } catch (error) {
-            console.log('>>>Error findbyPhoneNB in model: ', error);
+            console.error('Error in findUserByPhone:', error.message);
+            throw new Error('Error in findUserByPhone');
         }
     }
 
-    //get all user
+    // Lấy tất cả người dùng
     static async getAllUser() {
         try {
             const [rows] = await db.promise().query("SELECT * FROM user ORDER BY id DESC;");
-            console.log("Query get all user");
             return rows;
         } catch (error) {
-            console.log('>>>Error get all in model: ', error);
+            console.error('Error in getAllUser:', error.message);
+            throw new Error('Error in getAllUser');
         }
     }
 
-    //update user
+    // Cập nhật thông tin người dùng
     static async update(userId, updateData) {
         try {
             if (updateData.password) {
@@ -81,24 +134,34 @@ class User {
 
             return result.affectedRows > 0;
         } catch (error) {
-            console.error('Error updating admin:', error.message);
-            throw new Error('Error updating admin profile');
+            console.error('Error updating user:', error.message);
+            throw new Error('Error updating user profile');
         }
     }
 
-    //delete
+    // Xóa người dùng
     static async delete(userId) {
-        const [result] = await db.promise().query('DELETE FROM user WHERE id = ?', [userId]);
-        return result.affectedRows > 0;
+        try {
+            const [result] = await db.promise().query('DELETE FROM user WHERE id = ?', [userId]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error deleting user:', error.message);
+            throw new Error('Error deleting user');
+        }
     }
 
-    //Find one by ID
+    // Tìm người dùng theo ID
     static async findUserById(userId) {
-        console.log("find one by id");
-        const [rows] = await db.promise().query('SELECT * FROM user WHERE id = ?', [userId]);
-        return rows[0];
+        try {
+            const [rows] = await db.promise().query('SELECT * FROM user WHERE id = ?', [userId]);
+            return rows[0];
+        } catch (error) {
+            console.error('Error in findUserById:', error.message);
+            throw new Error('Error in findUserById');
+        }
     }
 
+    // Reset mật khẩu người dùng
     static async resetPassword(userId) {
         try {
             const newPassword = process.env.DEFAUlL_PASS_USER;
@@ -116,7 +179,6 @@ class User {
             throw new Error('Error resetting password');
         }
     }
-
 }
 
 module.exports = User;

@@ -52,6 +52,17 @@ class CategoryService {
         }
     }
 
+
+    static async getAllCategoryActive() {
+        console.log("Service: Retrieving all categories");
+        try {
+            return await Category.getAllCategoryActive();
+        } catch (error) {
+            console.error("Service Error in getAllCategories:", error);
+            throw error;
+        }
+    }
+
 }
 
 module.exports = CategoryService;

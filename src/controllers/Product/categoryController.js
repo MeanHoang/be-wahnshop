@@ -86,10 +86,27 @@ const getCategoryById = async (req, res) => {
     }
 };
 
+const getAllCategoryActive = async (req, res) => {
+    try {
+        const categories = await CategoryService.getAllCategoryActive();
+        return res.status(200).json({
+            success: true,
+            message: "Lấy danh sách danh mục thành công!",
+            categories: categories
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server. Không thể lấy danh mục!"
+        });
+    }
+};
+
 module.exports = {
     createCategory,
     getAllCategories,
     updateCategory,
     deleteCategory,
-    getCategoryById
+    getCategoryById,
+    getAllCategoryActive
 };

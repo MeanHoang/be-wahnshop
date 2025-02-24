@@ -102,5 +102,27 @@ class UserService {
         }
     }
 
+    static async signIn(email, password) {
+        console.log('Login with input data to service:', email, password);
+        try {
+            const user = await User.findUserByEmail(email);
+            console.log('User found:', user);
+
+            if (!user) {
+                throw new Error('Invalid username or password');
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+                throw new Error('Invalid username or password');
+            }
+
+            return user;
+        } catch (error) {
+            console.log('Error:', error);
+            throw error;
+        }
+    }
+
 }
 module.exports = UserService;

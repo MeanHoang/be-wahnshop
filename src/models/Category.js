@@ -67,6 +67,19 @@ class Category {
             throw error;
         }
     }
+
+
+    static async getAllCategoryActive() {
+        try {
+            const query = 'SELECT * FROM category WHERE is_sale = ?';
+            const [rows] = await db.promise().query(query, [true]);
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 }
 
 module.exports = Category;

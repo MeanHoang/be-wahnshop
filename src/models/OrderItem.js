@@ -2,12 +2,12 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
-class Product {
+class OrderItem {
 
     static async create(data) {
         try {
             const [result] = await db.promise().query(
-                'INSERT INTO product SET ?',
+                'INSERT INTO order_item SET ?',
                 data
             );
 
@@ -24,11 +24,11 @@ class Product {
         }
     }
 
-    static async update(productId, updateData) {
+    static async update(order_itemId, updateData) {
         try {
             const [result] = await db.promise().query(
-                'UPDATE product SET ? WHERE id = ?',
-                [updateData, productId]
+                'UPDATE order_item SET ? WHERE id = ?',
+                [updateData, order_itemId]
             );
             return result.affectedRows > 0;
         } catch (error) {
@@ -37,22 +37,22 @@ class Product {
         }
     }
 
-    static async delete(productId) {
+    static async delete(order_itemId) {
         try {
-            const query = `DELETE FROM product WHERE id = ?`;
-            await db.execute(query, [productId]);
+            const query = `DELETE FROM order_item WHERE id = ?`;
+            await db.execute(query, [order_itemId]);
             return true;
         } catch (error) {
-            console.error(`Error deleting product with ID ${productId}:`, error);
+            console.error(`Error deleting order_item with ID ${order_itemId}:`, error);
             throw error;
         }
     }
 
     //get all
-    static async getAllProduct() {
+    static async getAllOrderItem() {
         try {
             const [rows] = await db.promise().query(
-                'SELECT * FROM product'
+                'SELECT * FROM order_item'
             );
 
             return rows;
@@ -63,10 +63,10 @@ class Product {
     }
 
 
-    static async getProductById(productId) {
+    static async getOrderItemById(order_itemId) {
         try {
             const [rows] = await db.promise().query(
-                'SELECT * FROM product WHERE id = ?', [productId]);
+                'SELECT * FROM order_item WHERE id = ?', [order_itemId]);
             return rows[0] || null;
         } catch (error) {
             console.error("Error in model:", error);
@@ -74,10 +74,10 @@ class Product {
         }
     }
 
-    static async getProductByCategory(categoryId) {
+    static async getOrderItemByOrderDetailId(orderDetailId) {
         try {
             const [rows] = await db.promise().query(
-                'SELECT * FROM product WHERE category_id = ? ', [categoryId]);
+                'SELECT * FROM order_item WHERE order_id = ?', [orderDetailId]);
             return rows || null;
         } catch (error) {
             console.error("Error in model:", error);
@@ -87,4 +87,4 @@ class Product {
 
 }
 
-module.exports = Product;
+module.exports = OrderItem;
